@@ -1,0 +1,51 @@
+
+
+***********************
+*     DIRECTORIES     *
+***********************
+
+LabBook:
+	Each day has a .txt file and gets stored in the corresponding
+	year and month subdirectory along with any relevant image macros.
+	These are compiled together into a pdf using the compile_month.sh
+	script.
+
+***********************
+*       SCRIPTS       *
+***********************
+
+store.sh:
+	takes 1 argument which is the file to be stored. It will 
+	concatenate the contents of this file to the LaTeX code for the day/month
+	along with creating the file if needed, and timestamping the text. This 
+	also deletes the text file
+
+	-L flag (late storage)
+	takes 1 argument for file name, if -L flag is present it also takes day
+	and month and stores in respective .tex file
+	< not implemented >
+
+	-I flag (image)
+	moves an image to the directory and includes it as a graphic in the
+	LaTeX document.
+	< not implemented >
+
+	-C flag (.C macro I guess...)
+	moves a root .C macro to the directory, and includes the .png version 
+	in the LaTeX document.
+	< not implemented >
+	
+
+LabBook/compile_month.sh
+	Takes 2 arguments, year, and month name. It will compile all of the 
+	LaTeX code in that directory into one .tex document then compile it
+	with pdflatex. 
+	
+	It should correctly link all images together. All root
+	.C macros will be compiled to .png and linked in the text. After the 
+	final .pdf is generated the .png images will be deleted
+	< not implemented >
+
+LabBook/compile_year.sh
+	< not implemented >
+
