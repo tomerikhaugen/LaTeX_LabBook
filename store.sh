@@ -2,7 +2,7 @@
 
 # The whole LabBook directory system is built within this
 # directory. This is defined at the beginning and not changed
-PARENT="/user/haugen/LaTeX_LabBook/LabBook"
+PARENT=""
 
 # Set Date for today
 Define_Today() {
@@ -53,12 +53,12 @@ Append_Image() {
 	echo "\\includegraphics[width=15cm]{${LABBOOK_DIR}/${IMAGENAME}} " >> $FILENAME
 }
 
-
-#if [$PARENT == ""]
-#then
-#	echo "Set parent directory"
-#	exit
-#fi
+# Test if the parent directory is set
+if [$PARENT == ""]
+then
+	echo "Set parent directory to wherever you want the Lab Book written"
+	exit
+fi
 
 
 if [ $# == 0 ]
