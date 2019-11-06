@@ -1,3 +1,17 @@
+LaTeX_LabBook for Remote servers
+author Tom-Erik Haugen
+
+This is a set of macros for writing a lab book on a remote server. Text can be
+in blocks, then stored using the store.sh macro. When stored the text gets wrapped
+in LaTeX code so it can be compiled. It is moved to the appropriate year/month/day
+file.
+
+Images can also be stored, they will be linked to in the current position of the tex
+document, and moved to the appropriate year/month directory. This also uses the
+store.sh macro
+
+For the text to be appended in the Lab Book it should be written in a file called
+LabBook.tex this will be appended by store.sh and the original file will be deleted.
 
 
 ***********************
@@ -19,6 +33,11 @@ store.sh:
 	concatenate the contents of this file to the LaTeX code for the day/month
 	along with creating the file if needed, and timestamping the text. This 
 	also deletes the text file
+
+	Currently only accepts 3 formats of files:
+	LabBook.tex : appends to the current tex document
+	      *.png : moves to appropriate directory and links in text
+		  *.C   : moves to appropriate directory and links to .png in text
 
 	-L flag (late storage)
 	takes 1 argument for file name, if -L flag is present it also takes day
