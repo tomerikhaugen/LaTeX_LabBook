@@ -2,7 +2,7 @@
 
 # The whole LabBook directory system is built within this
 # directory. This is defined at the beginning and not changed
-PARENT=""
+PARENT="/user/haugen/LaTeX_LabBook/LabBook"
 
 # Set Date for today
 Define_Today() {
@@ -48,51 +48,53 @@ Write_LabBook() {
 
 Append_Image() {
 	IMAGENAME=$(echo $MACRONAME | cut -f1 -d ".")
-	echo $IMAGENAME
 	echo "\\\ " >> $FILENAME
 	echo "\\includegraphics[width=15cm]{${LABBOOK_DIR}/${IMAGENAME}} " >> $FILENAME
 }
 
-# Test if the parent directory is set
-if [$PARENT == ""]
+
+
+# Test if the parent directory is set. If it is not
+# the script will not run.
+if [ -z "$PARENT" ]
 then
 	echo "Set parent directory to wherever you want the Lab Book written"
 	exit
 fi
 
 
-if [ $# == 0 ]
-then
-	echo "Input a file name to store"
-else
-	case $1 in
-		"LabBook.tex")
+# The bulk of the actual macro. Wrapped in a flag system
+# flags are described in README and the help file.
+
+while getopts "hL:C:I:" opt; do
+	case $opt in
+		h)
+			echo "help message"
+			exit
+			;;
+		L)
 			Define_Today
 			Define_Now
 			Define_Dir
 			Define_LabBook_Filename
-			INFILE=$1
+			INFILE=$OPTARG
 			Write_LabBook
 			;;
-		*".C")
-			MACRONAME=$1
+		C)
+			MACRONAME=$OPTARG
 			Define_Today
 			Define_Dir
 			Define_LabBook_Filename
 			Append_Image
 			mv ${1} ${LABBOOK_DIR}/${1}
 			;;
-		*".png")
-			MACRONAME=$1
+		I)
+			MACRONAME=$OPTARG
 			Define_Today
 			Define_Dir
 			Define_LabBook_Filename
 			Append_Image
 			mv ${1} ${LABBOOK_DIR}/${1}
-			;;
-		*)
-			echo "Did not recognize input"
 			;;
 	esac
-fi
-
+done
