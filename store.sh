@@ -6,16 +6,13 @@ PARENT=""
 
 # Set Date for today
 Define_Today() {
-    DATETIME=$(date)
-    YEAR=$(echo $DATETIME | cut -f6 -d ' ')
-    MONTH=$(echo $DATETIME | cut -f2 -d ' ')
-    DAY=$(echo $DATETIME | cut -f3 -d ' ')
-	DATE=$(date +%F)
+	read -r YEAR MONTH DAY <<<$(date +%Y\ %M\ %d)
+	DATE="$YEAR-$MONTH-$DAY"
 }
 
 # Set Time for now
 Define_Now() {
-    TIME=$(echo $DATETIME | cut -f4 -d ' ')
+    TIME=$(date +%T)
 }
 
 # Create the needed directory for the Date
