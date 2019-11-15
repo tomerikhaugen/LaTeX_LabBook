@@ -2,7 +2,7 @@
 
 # The whole LabBook directory system is built within this
 # directory. This is defined at the beginning and not changed
-PARENT="/user/haugen/LaTeX_LabBook/LabBook"
+PARENT=""
 
 # Set Date for today
 Define_Today() {
@@ -44,9 +44,8 @@ Write_LabBook() {
 }
 
 Append_Image() {
-	IMAGENAME=$(echo $MACRONAME | cut -f1 -d ".")
 	echo "\\\ " >> $FILENAME
-	echo "\\includegraphics[width=15cm]{${LABBOOK_DIR}/${IMAGENAME}} " >> $FILENAME
+	echo "\\includegraphics[${SIZEMESSAGE}]{${LABBOOK_DIR}/${IMAGEFILE}} " >> $FILENAME
 }
 
 
@@ -60,38 +59,80 @@ then
 fi
 
 
-# The bulk of the actual macro. Wrapped in a flag system
-# flags are described in README and the help file.
+# Internal variables. They hold the flag arguments to allow
+# for multiple flags at once. Each flag variable will hold one
+# value at most so multiple of the same flags will give only
+# the final value given.
 
-while getopts "hL:C:I:" opt; do
+LABFILE=""
+IMAGEFILE=""
+IMAGESIZE=""
+
+# Captures the user flags
+while getopts "hL:C:I:s:" opt; do
 	case $opt in
 		h)
-			echo "help message"
+			echo "this message will be helpful in the future"
 			exit
 			;;
 		L)
-			Define_Today
-			Define_Now
-			Define_Dir
-			Define_LabBook_Filename
-			INFILE=$OPTARG
-			Write_LabBook
+			LABFILE=$OPTARG
+			if [ -z "$LABFILE" ]
+			then
+				echo "this is empty!"
+			fi
+			echo $LABFILE
 			;;
 		C)
-			MACRONAME=$OPTARG
-			Define_Today
-			Define_Dir
-			Define_LabBook_Filename
-			Append_Image
-			mv ${1} ${LABBOOK_DIR}/${1}
+			echo "This is not implemented yet"
+			echo "I don't even know whey this"
+			echo "flag is coded in."
 			;;
 		I)
-			MACRONAME=$OPTARG
-			Define_Today
-			Define_Dir
-			Define_LabBook_Filename
-			Append_Image
-			mv ${1} ${LABBOOK_DIR}/${1}
+			IMAGEFILE=$OPTARG
 			;;
+		s)
+			IMAGESIZE=$OPTARG
 	esac
 done
+
+
+# Check which flag variables have been given values
+
+# Store the LabBook
+if [ -z "$LABFILE" ]
+then
+	echo > /dev/null
+else
+	Define_Today
+	Define_Now
+	Define_Dir
+	Define_LabBook_Filename
+	INFILE=$LABFILE
+	Write_LabBook
+fi
+
+
+# Store the image
+if [ -z "$IMAGEFILE" ]
+then
+	echo > /dev/null
+else
+	IMMAGENAME=$IMAGEFILE
+	SIZEMESSAGE=""
+
+	# Check if Imagesize is specified
+	if [ -z "$IMAGESIZE" ]
+	then
+		SIZEMESSAGE="width=15cm"
+	else
+		SIZEMESSAGE="width=${IMAGESIZE}cm"
+	fi
+
+	Define_Today
+	Define_Dir
+	Define_LabBook_Filename
+	Append_Image
+
+	mv ${IMAGEFILE} ${LABBOOK_DIR}/${IMAGEFILE}
+fi

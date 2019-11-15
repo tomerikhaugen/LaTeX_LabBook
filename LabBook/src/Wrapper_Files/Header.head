@@ -6,3 +6,4 @@
 \usepackage{hyperref}
 
 \begin{document}
+\tableofcontents
