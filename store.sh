@@ -77,11 +77,6 @@ while getopts "hL:C:I:s:" opt; do
 			;;
 		L)
 			LABFILE=$OPTARG
-			if [ -z "$LABFILE" ]
-			then
-				echo "this is empty!"
-			fi
-			echo $LABFILE
 			;;
 		C)
 			echo "This is not implemented yet"
@@ -100,10 +95,8 @@ done
 # Check which flag variables have been given values
 
 # Store the LabBook
-if [ -z "$LABFILE" ]
+if [ -n "$LABFILE" ]
 then
-	echo > /dev/null
-else
 	Define_Today
 	Define_Now
 	Define_Dir
@@ -114,10 +107,8 @@ fi
 
 
 # Store the image
-if [ -z "$IMAGEFILE" ]
+if [ -n "$IMAGEFILE" ]
 then
-	echo > /dev/null
-else
 	IMMAGENAME=$IMAGEFILE
 	SIZEMESSAGE=""
 

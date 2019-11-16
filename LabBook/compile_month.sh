@@ -17,17 +17,19 @@ else
 		DAY=$(echo $NAME | cut -f1 -d '.')
 		DAY=$(echo $DAY | cut -f3 -d '-')
 		echo $DAY
-		echo "\\section*{${2} ${DAY} ${1}} " >> ${DIR}/${TEXFILE}
+		echo "\\section{${2} ${DAY} ${1}} " >> ${DIR}/${TEXFILE}
 		cat ${DIR}/${NAME} >> "${DIR}/${TEXFILE}"
 		#echo " \\\ " >> ${DIR}/${TEXFILE}
 	done
 	cat "src/Wrapper_Files/Footer.foot" >> "${DIR}/${TEXFILE}"
 
 	# COMPILE THE LATEX CODE INTO PDF
+	pdflatex "${DIR}/${TEXFILE}">/dev/null
 	pdflatex "${DIR}/${TEXFILE}"
 	mv ${2}_${1}.pdf Output/
 	rm *.log
-	rm *.aux
 	rm *.out
-
+	rm *.aux
+	rm *.toc
+	rm *.lof
 fi
