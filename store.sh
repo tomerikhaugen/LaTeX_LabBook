@@ -6,7 +6,7 @@ PARENT=""
 
 # Set Date for today
 Define_Today() {
-	read -r YEAR MONTH DAY <<<$(date +%Y\ %M\ %d)
+	read -r YEAR MONTH DAY <<<$(date +%Y\ %b\ %d)
 	DATE="$YEAR-$MONTH-$DAY"
 }
 
@@ -67,10 +67,9 @@ fi
 LABFILE=""
 IMAGEFILE=""
 IMAGESIZE=""
-COPY=false
 
 # Captures the user flags
-while getopts "hL:C:I:i:s:" opt; do
+while getopts "hL:C:I:s:" opt; do
 	case $opt in
 		h)
 			echo "this message will be helpful in the future"
@@ -86,10 +85,6 @@ while getopts "hL:C:I:i:s:" opt; do
 			;;
 		I)
 			IMAGEFILE=$OPTARG
-			;;
-		i)
-			IMAGEFILE=$OPTARG
-			COPY=true
 			;;
 		s)
 			IMAGESIZE=$OPTARG
@@ -130,11 +125,5 @@ then
 	Define_LabBook_Filename
 	Append_Image
 
-	# Either copy the image or move it
-	if [ $COPY ]
-	then
-		cp ${IMAGEFILE} ${LABBOOK_DIR}/${IMAGEFILE}
-	else
-		mv ${IMAGEFILE} ${LABBOOK_DIR}/${IMAGEFILE}
-	fi
+	mv ${IMAGEFILE} ${LABBOOK_DIR}/${IMAGEFILE}
 fi
