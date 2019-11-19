@@ -14,7 +14,8 @@ The bulk of the work is carried in this macro. It currently does 2 functions,
 List of flags:
 -L store a lab book entry
 -C store a root image macro
--I store an image
+-I store an image (move it to directory and link in text)
+-i copy an image  (copy it to directory and link in text)
 -s subflag for -C and -I to also specify the size of image (otherwise image is 15 cm)
 
 ### Store Lab Book text:
