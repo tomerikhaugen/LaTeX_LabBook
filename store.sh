@@ -31,6 +31,7 @@ Define_LabBook_Filename() {
 # with creating file if it does not exist. Also
 # deletes the original file given as an argument
 Write_LabBook() {
+
     if [ -f "$FILENAME" ]; then
         echo "appending to $FILENAME"
     else
@@ -39,7 +40,7 @@ Write_LabBook() {
     fi
 
     echo "\\subsection*{${TIME}} " >> $FILENAME
-	if [ $PLAINTEXT ]
+	if [ -n "$PLAINTEXT"  ]
 	then
 		echo ${INFILE} >> $FILENAME
 	else
@@ -72,7 +73,7 @@ fi
 LABFILE=""
 IMAGEFILE=""
 IMAGESIZE=""
-PLAINTEXT=false
+PLAINTEXT=""
 
 # Captures the user flags
 while getopts "hL:T:C:I:s:" opt; do
@@ -86,7 +87,7 @@ while getopts "hL:T:C:I:s:" opt; do
 			;;
 		T)
 			LABFILE=$OPTARG
-			PLAINTEXT=true
+			PLAINTEXT="true"
 			;;
 		C)
 			echo "This is not implemented yet"
