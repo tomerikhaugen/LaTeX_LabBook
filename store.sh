@@ -2,8 +2,17 @@
 
 # The whole LabBook directory system is built within this
 # directory. This is defined at the beginning and not changed
-PARENT=""
-
+get_script_dir () {
+	SOURCE="${BASH_SOURCE[0]}"
+	while [ -h "$SOURCE" ]; do
+		DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+		SOURCE="$( readlink "$SOURCE" )"
+		[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+	done
+	DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+	echo "$DIR"
+}
+PARENT="$(get_script_dir)/.files"
 # Set Date for today
 Define_Today() {
 	read -r YEAR MONTH DAY MONTH_NUM <<<$(date +%Y\ %b\ %d\ %m)
