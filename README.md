@@ -12,10 +12,22 @@ Recommended installation is to decide which directory is the parent directory, t
 The bulk of the work is carried in this macro. It currently does 2 functions,
 
 List of flags:
--L store a lab book entry
+
+-T store plain text as a lab book entry
+	Takes string of text as argument
+
+-L store a lab book entry from text document
+	Takes document name as argument 
+
 -C store a root image macro
+	( NOT IMPLEMENTED YET )
+
 -I store an image (move it to directory and link in text)
+	Takes name of image as argument
+
 -i copy an image  (copy it to directory and link in text)
+	Takes name of image as argument
+
 -s subflag for -C and -I to also specify the size of image (otherwise image is 15 cm)
 
 ### Store Lab Book text:

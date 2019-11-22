@@ -6,8 +6,8 @@ PARENT=""
 
 # Set Date for today
 Define_Today() {
-	read -r YEAR MONTH DAY <<<$(date +%Y\ %b\ %d)
-	DATE="$YEAR-$MONTH-$DAY"
+	read -r YEAR MONTH DAY MONTH_NUM <<<$(date +%Y\ %b\ %d\ %m)
+	DATE="$YEAR-$MONTH_NUM-$DAY"
 }
 
 # Set Time for now
@@ -31,6 +31,7 @@ Define_LabBook_Filename() {
 # with creating file if it does not exist. Also
 # deletes the original file given as an argument
 Write_LabBook() {
+
     if [ -f "$FILENAME" ]; then
         echo "appending to $FILENAME"
     else
@@ -39,8 +40,13 @@ Write_LabBook() {
     fi
 
     echo "\\subsection*{${TIME}} " >> $FILENAME
-    cat $INFILE >> $FILENAME
-    rm $INFILE
+	if [ -n "$PLAINTEXT"  ]
+	then
+		echo ${INFILE} >> $FILENAME
+	else
+    	cat $INFILE >> $FILENAME
+		rm $INFILE
+	fi
 }
 
 Append_Image() {
@@ -67,9 +73,10 @@ fi
 LABFILE=""
 IMAGEFILE=""
 IMAGESIZE=""
+PLAINTEXT=""
 
 # Captures the user flags
-while getopts "hL:C:I:s:" opt; do
+while getopts "hL:T:C:I:s:" opt; do
 	case $opt in
 		h)
 			echo "this message will be helpful in the future"
@@ -77,6 +84,10 @@ while getopts "hL:C:I:s:" opt; do
 			;;
 		L)
 			LABFILE=$OPTARG
+			;;
+		T)
+			LABFILE=$OPTARG
+			PLAINTEXT="true"
 			;;
 		C)
 			echo "This is not implemented yet"
