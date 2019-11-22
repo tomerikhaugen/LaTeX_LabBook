@@ -1,0 +1,259 @@
+#!/usr/bin/env bash
+
+CONFIG_DIR="${HOME}/.labbook"
+TABLE="$CONFIG_DIR/table.dat"
+SETTINGS="$CONFIG_DIR/settings.dat"
+LAB_DIR="$CONFIG_DIR/LabBooks"
+MACRO_DIR="$CONFIG_DIR/macros"
+MACRO_TABLE="$MACRO_DIR/table.dat"
+
+create_entry() { # create an entry into the labbook
+
+	# First, determine which labbook and find its directory
+	BOOK="$DEFAULT"
+	FILE= # choice to add FILE to the labbook
+	IMAGE= #optional image to add to the labbook
+	IMAGE_SIZE="15" #Optional image size
+	CAPTION= #Optional Caption
+	while [ "$1" != "" ]; do	
+		case "$1" in
+			-b | --book )		shift
+								BOOK=$1
+								;;
+			-f | --file )		shift
+								FILE="$1"
+								;;
+			-i | --image )		shift
+								IMAGE="$1"
+								;;
+			-s | --image_size )	shift
+								IMAGE_SIZE="$1"
+								;;
+			-c | --caption )	shift
+								CAPTION="$1"
+								;;
+			-m | --macro ) 		shift
+								MACRO="$1"
+								echo "This is for later"
+								;;
+			* )					exit 1	
+		esac
+		shift
+	done
+	DIR=$(get_dir $BOOK)
+	echo "Using $BOOK at $DIR"
+	ID="$(date +"%Y%m%d%H%M%S")"
+	ENTRY="$DIR/$BOOK-$ID.tex.entry"
+	touch $ENTRY
+	echo "Created an Entry at $ENTRY"
+	# create a section header
+	echo '\subsection{'"$ID"'}' >> $ENTRY
+	if [ ! -z "$CAPTION" ]; then
+		echo "$CAPTION" >> $ENTRY
+		echo "Appended your caption"
+	fi
+
+	if [ ! -z $FILE ]; then
+		cat $FILE >> $ENTRY
+		echo "Appended $FILE"
+	fi
+
+	if [ ! -z $IMAGE ]; then
+		IMAGE_BASENAME=${IMAGE##*/}
+		IMAGE_FILE="$DIR/images/$IMAGE_BASENAME"
+		if [ ! -f $IMAGE_FILE ]; then
+			cp $IMAGE $IMAGE_FILE # move the image to the labbooks directory
+			echo "Copied $IMAGE to $IMAGE_FILE"
+		elif [ "$(diff $IMAGE $IMAGE_FILE)" != "" ]; then # check images are different
+			EXT=${IMAGE_BASENAME##*.}
+			IMAGENAME=${IMAGE_BASENAME%%.$EXT}
+			IMAGE_FILE="$DIR/images/$IMAGENAME-$ID.$EXT"
+			cp $IMAGE $IMAGE_FILE
+			echo "Copied $IMAGE to $IMAGE_FILE"
+		fi
+		IMAGE_STRING="width=${IMAGE_SIZE}cm"
+		# now add the image the the entry
+		echo '\ ' >> $ENTRY
+		echo '\includegraphics['"$IMAGE_STRING"']{'"images/${IMAGE_FILE##*/}"'}' >> $ENTRY
+		echo "Append image to entry"
+	fi
+		
+}
+
+load_settings() { # load up the parameters from the settings file
+
+	while IFS= read -r line; do
+		read -r PAR VAL <<< "$line"
+		eval "$PAR"="$VAL"
+	done < "$SETTINGS"
+}
+
+get_dir() { # get the directory corresponding to a labbook
+
+	NAME="$1"
+	while IFS= read -r line; do
+		read -r N DIR <<< "$line"
+		if [ "$NAME" = "$N" ]; then
+			echo $DIR
+			break
+		fi
+	done < "$TABLE"
+}
+
+new() { # define a new labbook folder
+
+	local NAME="$1"
+	local DIR="$2"
+
+	grep "$NAME" "$TABLE"
+	if [ $? -eq 0 ]; then
+		echo "Lab Book with that name already exists!"
+		exit 1
+	fi
+
+	if [ -z $DIR ]; then
+		DIR="$LAB_DIR/$NAME"
+	fi
+	grep "$DIR" "$TABLE"
+	if [ $? -eq 0 ]; then
+		echo "Lab Book with that directory already exists!"
+		exit 2
+	fi
+	echo "$NAME $DIR" >> $TABLE
+	mkdir -p $DIR # base directory
+	mkdir -p "$DIR/images"
+	mkdir -p "$DIR/macros"
+
+	echo "New Lab Book \"$NAME\" Successfully Created at \"$DIR\""
+	exit 0
+}
+
+set_param() { # set a parameter to a value
+
+	local PARAM="$1"
+	local VALUE="$2"
+
+	# verify the parameter is valid
+	grep "$PARAM" "$SETTINGS" > /dev/null
+	if [ ! $? -eq 0 ]; then
+		echo "Invalid Parameter"
+		exit 3
+	fi
+
+	# Create a temporary settings file to write to
+	local TMP="/tmp/labbook_settings.tmp"
+	if [ -f $TMP ]; then # make sure it doesn't exist already
+		rm -f $TMP
+	fi
+	touch $TMP
+	while IFS= read -r line; do
+		read -r PAR VAL <<< "$line"
+		# If the parameter in the file is the same as ours
+		# update its value
+		if [ "$PARAM" = "$PAR" ]; then
+			VAL="$VALUE"
+		fi
+		if [ ! -z $PAR ]; then
+			echo "$PAR $VAL" >> $TMP
+		fi
+	done < "$SETTINGS"
+	# Overwrite the old settings file with the updated one
+	[ $? -eq 0 ] && mv "$TMP" "$SETTINGS"
+}
+
+run_test() {
+
+	set_param DEFAULT default
+	echo "$DEFAULT"
+	get_dir $DEFAULT
+
+}
+
+if [ ! -d $CONFIG_DIR ]; then
+	mkdir -p $CONFIG_DIR
+fi
+
+if [ ! -d $LAB_DIR ]; then
+	mkdir -p $LAB_DIR
+fi
+
+if [ ! -f $TABLE ]; then
+	touch $TABLE
+fi
+
+if [ ! -d $MACRO_DIR ]; then
+	mkdir -p $MACRO_DIR
+	# include some default macros
+	touch $MACRO_TABLE
+	# Setup the table	
+	echo "image $MACRO_DIR/image.macro" > $MACRO_TABLE
+
+
+fi
+
+if [ ! -f $SETTINGS ]; then
+	touch $SETTINGS
+	# Setup the default settings
+	echo "DEFAULT default" >> $SETTINGS
+
+	new default # create the default directory
+fi
+
+
+# Load the settings for labbook
+load_settings
+
+helpmsg() { # print the help message
+
+	echo 'Usage: labbook ACTION [ARGS]'
+	echo 'Inspect, modify, configure, or create lab books'
+	echo ''
+	echo 'Actions:'
+	echo '  -c, --create NAME [DIRECTORY]  Create a new labbook named NAME'
+    echo '                                   at a specified directory'
+	echo '  -l, --list                     List labbooks by name and path'
+	echo '  -s, --set PARAMETER VALUE      Modify the labbook settings'
+	echo '  -i, --settings                 View the labbook settings'
+	echo '  -t, --test                     Run Tests'
+	echo '  -e, --entry [OPTIONS]          Create a new entry in a lab book'
+	echo '  Options for --entry:'
+	echo '    -b, --book BOOK              The lab book to add to'
+	echo '    -f, --file FILENAME          A .tex file to add to the entry'
+	echo '    -i, --image IMAGENAME        An image file to append to the entry'  
+	echo '    -s, --size SIZE              Image size in cm (default 15)'
+	echo '    -c, --caption CAPTION        A caption (use quotes!) to add'
+	echo '    -m, --macro MACRO            use a saved macro (Not implimented)'
+}				
+
+
+while [ "$1" != "" ]; do
+	case $1 in
+		-h | --help )		shift
+							helpmsg
+							exit 0
+							;;
+		-c | --create )		shift
+							new "$1" "$2"
+							shift
+							;;
+		-l | --list )		shift
+							cat "$TABLE"
+							;;
+		-s | --set )		shift
+							set_param "$1" "$2"
+							shift
+							;;
+		-i | --settings )	shift
+							cat "$SETTINGS"
+							;;
+		-t | --test ) 		shift
+							run_test
+							;;
+		-e | --entry )		shift
+							create_entry "$@"
+							;;
+		* )					exit 1
+	esac
+	shift
+done
+
